@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="bn" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FREE FIRE ESPORTS - Tournament Platform</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Teko for slanted Esports headers, Rajdhani & Inter for UI -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&family=Teko:wght@700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        ffGold: '#FFB800',
+                        ffOrange: '#FF4D00',
+                        ffDarkBg: '#0B0E14',
+                        ffCardBg: '#151922',
+                        ffCardHeader: '#E86B6B',
+                    },
+                    fontFamily: {
+                        ffTitle: ['Teko', 'sans-serif'],
+                        rajdhani: ['Rajdhani', 'sans-serif'],
+                        bn: ['Hind Siliguri', 'sans-serif'],
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Free Fire Slanted Text Effect */
+        .ff-slanted-title {
+            font-family: 'Teko', sans-serif;
+            transform: skewX(-8deg);
+            display: inline-block;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(180deg, #FFF066 0%, #FFB800 50%, #FF4D00 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0px 4px 15px rgba(255, 184, 0, 0.6)) drop-shadow(3px 3px 0px #000);
+        }
+
+        .sticky-nav {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            backdrop-filter: blur(12px);
+        }
+
+        /* Custom Scrollbar */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Light Theme Overrides */
+        html:not(.dark) body {
+            background-color: #f3f4f6;
+            color: #111827;
+        }
+        html:not(.dark) .bg-[#0b0e14] {
+            background-color: #f9fafb !important;
+        }
+        html:not(.dark) .bg-ffCardBg, html:not(.dark) .bg-gray-900 {
+            background-color: #ffffff !important;
+            border-color: #e5e7eb !important;
+            color: #111827 !important;
+        }
+        html:not(.dark) .text-white {
+            color: #111827 !important;
+        }
+        html:not(.dark) .text-gray-300, html:not(.dark) .text-gray-400 {
+            color: #4b5563 !important;
+        }
+    </style>
+</head>
+<body class="bg-[#0b0e14] text-gray-100 font-sans min-h-screen flex flex-col selection:bg-ffGold selection:text-black transition-colors duration-200">
+
+    <!-- TOP LEFT PROFILE MENU DRAWER TOGGLE -->
+    <button onclick="toggleSidebar()" class="fixed top-4 left-4 z-50 bg-ffGold text-black p-2.5 sm:p-3 rounded-lg shadow-lg hover:bg-yellow-400 transition font-bold flex items-center gap-2 border border-black/20">
+        <i class="fa-solid fa-bars text-lg"></i>
+        <span class="hidden sm:inline font-rajdhani uppercase tracking-wider text-sm" data-key="myMenu">My Menu</span>
+    </button>
+
+    <!-- ADMIN PANEL QUICK BUTTON (Top Right) -->
+    <button onclick="openAdminModal()" class="fixed top-4 right-4 z-50 bg-red-600 text-white px-3 py-2 rounded-lg shadow-lg hover:bg-red-700 transition font-bold text-xs sm:text-sm flex items-center gap-2 border border-red-400/30">
+        <i class="fa-solid fa-user-shield"></i>
+        <span data-key="hostPortal">Host Portal</span>
+    </button>
+
+    <!-- SIDEBAR PROFILE DRAWER -->
+    <div id="sidebarDrawer" class="fixed inset-y-0 left-0 w-80 bg-ffCardBg border-r border-gray-800 transform -translate-x-full transition-transform duration-300 ease-in-out z-50 flex flex-col shadow-2xl">
+        <div class="p-5 border-b border-gray-800 flex justify-between items-center bg-black/40">
+            <h2 class="font-rajdhani font-bold text-xl text-ffGold flex items-center gap-2">
+                <i class="fa-solid fa-id-card"></i> <span data-key="playerMenu">MY PLAYER MENU</span>
+            </h2>
+            <button onclick="toggleSidebar()" class="text-gray-400 hover:text-white text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="p-5 overflow-y-auto flex-1 space-y-6">
+            <!-- Profile Card -->
+            <div class="bg-black/30 p-4 rounded-xl border border-gray-800 text-center relative">
+                <img id="menuAvatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=FreeFirePlayer" alt="Avatar" class="w-20 h-20 mx-auto rounded-full border-2 border-ffGold shadow-lg mb-3">
+                <h3 id="displayUsername" class="text-lg font-bold text-white font-rajdhani">FF_PRO_PLAYER</h3>
+                <p class="text-xs text-ffGold font-mono mt-1">IGN: <span id="displayIGN" class="text-gray-300">ShadowNinja</span></p>
+                <p class="text-xs text-gray-400 font-mono">UID: <span id="displayUID" class="text-gray-300">1892837492</span></p>
+                
+                <button onclick="toggleProfileEdit()" class="mt-4 w-full py-2 bg-gray-800 hover:bg-gray-700 text-xs font-semibold rounded-lg text-ffGold border border-ffGold/30 transition">
+                    <i class="fa-solid fa-pen-to-square mr-1"></i> <span data-key="editProfile">Edit Profile</span>
+                </button>
+            </div>
+
+            <!-- Edit Form -->
+            <div id="profileEditForm" class="hidden bg-gray-900/90 p-4 rounded-xl border border-ffGold/40 space-y-3">
+                <h4 class="text-xs font-bold text-ffGold uppercase tracking-wider" data-key="updateInfo">Update Profile Information</h4>
+                <div>
+                    <label class="text-xs text-gray-400" data-key="lblUsername">Username</label>
+                    <input type="text" id="inputUsername" class="w-full bg-black border border-gray-700 rounded px-2 py-1.5 text-sm text-white focus:border-ffGold outline-none">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400" data-key="lblIGN">In-Game Name (IGN)</label>
+                    <input type="text" id="inputIGN" class="w-full bg-black border border-gray-700 rounded px-2 py-1.5 text-sm text-white focus:border-ffGold outline-none">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400" data-key="lblUID">Free Fire UID</label>
+                    <input type="number" id="inputUID" class="w-full bg-black border border-gray-700 rounded px-2 py-1.5 text-sm text-white focus:border-ffGold outline-none">
+                </div>
+                <button onclick="saveProfile()" class="w-full py-2 bg-ffGold text-black font-bold text-xs rounded shadow hover:bg-yellow-400" data-key="saveChanges">
+                    Save Changes
+                </button>
+            </div>
+
+            <!-- Settings & Account Switch -->
+            <div class="space-y-2">
+                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2" data-key="accountSettings">Account & Settings</h4>
+                <button onclick="switchAccount()" class="w-full text-left px-4 py-3 bg-gray-900/60 hover:bg-gray-800 rounded-lg text-sm text-gray-300 flex items-center justify-between border border-gray-800">
+                    <span><i class="fa-solid fa-users-gear mr-2 text-ffGold"></i> <span data-key="switchAccount">Switch Account</span></span>
+                    <i class="fa-solid fa-chevron-right text-xs text-gray-500"></i>
+                </button>
+                <button onclick="toggleTheme()" class="w-full text-left px-4 py-3 bg-gray-900/60 hover:bg-gray-800 rounded-lg text-sm text-gray-300 flex items-center justify-between border border-gray-800">
+                    <span><i class="fa-solid fa-circle-half-stroke mr-2 text-ffGold"></i> <span data-key="themeToggle">Theme Toggle</span></span>
+                    <span id="themeLabel" class="text-xs bg-gray-800 px-2 py-1 rounded text-gray-400">Dark Cyber</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="p-4 border-t border-gray-800 text-center text-xs text-gray-500">
+            Free Fire Esports Hub v3.0
+        </div>
+    </div>
+    <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden"></div>
+
+    <!-- HERO SECTION WITH CANVAS BG & SLANTED LOGO -->
+    <header class="relative w-full h-[400px] sm:h-[460px] bg-black border-b-4 border-ffGold flex flex-col justify-center items-center text-center p-4 overflow-hidden shadow-2xl">
+        <canvas id="heroCanvas" class="absolute inset-0 w-full h-full object-cover opacity-60"></canvas>
+        <div class="absolute inset-0 bg-gradient-to-t from-[#0b0e14] via-black/40 to-black/70"></div>
+
+        <div class="relative z-10 max-w-4xl mx-auto px-4 mt-6">
+            <div class="inline-block bg-red-600/80 backdrop-blur text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest mb-3 shadow-lg border border-red-500/50">
+                <i class="fa-solid fa-fire mr-1 animate-pulse"></i> <span data-key="officialBadge">Official Scrims & Tournaments</span>
+            </div>
+
+            <!-- Slanted Free Fire Heading -->
+            <div>
+                <h1 class="ff-slanted-title text-5xl sm:text-7xl md:text-8xl leading-none font-extrabold tracking-tight">
+                    FREE FIRE ESPORTS
+                </h1>
+            </div>
+
+            <p class="text-base sm:text-xl font-rajdhani font-semibold text-gray-300 tracking-widest mt-1 uppercase">
+                UNOFFICIAL
+            </p>
+
+            <!-- Dynamic Live Countdown -->
+            <div class="mt-4 bg-black/70 border border-ffGold/30 backdrop-blur-md px-6 py-3 rounded-xl inline-flex flex-col items-center shadow-2xl">
+                <div class="text-xs text-ffGold font-bold uppercase tracking-widest mb-1">
+                    <i class="fa-solid fa-clock mr-1"></i> <span data-key="nextStartIn">Next Tournament Starts In</span>
+                </div>
+                <div id="heroCountdown" class="font-mono text-2xl sm:text-3xl font-bold text-white tracking-widest">
+                    00d : 00h : 00m : 00s
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- STICKY NAVIGATION BAR WITH LANGUAGE TOGGLE -->
+    <nav class="sticky-nav bg-[#0b0e14]/90 border-b border-gray-800 shadow-xl py-3 px-4">
+        <div class="max-w-6xl mx-auto flex flex-wrap justify-between items-center gap-2 font-rajdhani font-bold">
+            <div class="flex items-center gap-2 sm:gap-4 mx-auto sm:mx-0">
+                <button onclick="scrollToSection('upcomingSection')" class="px-4 sm:px-5 py-2 rounded-lg bg-gray-800/80 hover:bg-ffGold hover:text-black text-white text-xs sm:text-sm transition border border-gray-700 shadow" data-key="navUpcoming">
+                    Upcoming
+                </button>
+                <button onclick="scrollToSection('joinSection')" class="px-4 sm:px-5 py-2 rounded-lg bg-gray-800/80 hover:bg-ffGold hover:text-black text-white text-xs sm:text-sm transition border border-gray-700 shadow" data-key="navJoin">
+                    Join Tournament
+                </button>
+                <button onclick="scrollToSection('rulesSection')" class="px-4 sm:px-5 py-2 rounded-lg bg-gray-800/80 hover:bg-ffGold hover:text-black text-white text-xs sm:text-sm transition border border-gray-700 shadow" data-key="navRules">
+                    Rules
+                </button>
+            </div>
+
+            <!-- Language Switcher Toggle Button -->
+            <button onclick="toggleLanguage()" class="mx-auto sm:mx-0 bg-gray-900 border border-ffGold text-ffGold px-3 py-1.5 rounded-lg text-xs font-bold uppercase flex items-center gap-2 hover:bg-ffGold hover:text-black transition">
+                <i class="fa-solid fa-language text-base"></i>
+                <span id="langLabel">বাংলা</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-8 space-y-12">
+
+        <!-- 1. UPCOMING TOURNAMENT SECTION -->
+        <section id="upcomingSection" class="space-y-4">
+            <div class="flex justify-between items-center border-b border-gray-800 pb-2">
+                <h2 class="text-xl sm:text-2xl font-bold font-rajdhani text-white uppercase tracking-wider flex items-center gap-2">
+                    <span class="w-3 h-3 bg-ffGold inline-block rounded-sm"></span> <span data-key="upcomingTitle">UPCOMING TOURNAMENT</span>
+                </h2>
+                <span class="text-xs text-gray-400 font-mono" data-key="sortedEarliest">Sorted by earliest date</span>
+            </div>
+
+            <!-- Horizontal Grid Container (Top 3) -->
+            <div id="upcomingGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Cards injected via JS -->
+            </div>
+
+            <div class="pt-2">
+                <button id="seeAllUpcomingBtn" onclick="toggleSeeAllUpcoming()" class="bg-gray-800 hover:bg-gray-700 text-gray-200 px-6 py-2 rounded font-bold text-xs tracking-wider uppercase border border-gray-700 transition" data-key="seeAll">
+                    SEE ALL
+                </button>
+            </div>
+        </section>
+
+        <!-- 2. JOIN TOURNAMENT SECTION -->
+        <section id="joinSection" class="space-y-6">
+            <div class="border-b border-gray-800 pb-2">
+                <h2 class="text-xl sm:text-2xl font-bold font-rajdhani text-white uppercase tracking-wider flex items-center gap-2">
+                    <span class="w-3 h-3 bg-red-500 inline-block rounded-sm"></span> <span data-key="joinTitle">JOIN TOURNAMENT</span>
+                </h2>
+            </div>
+
+            <!-- Category Filter Tabs -->
+            <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2">
+                <button onclick="filterCategory('ALL')" class="cat-btn bg-ffGold text-black px-4 py-2 rounded font-bold text-xs uppercase whitespace-nowrap border border-ffGold transition" data-key="catAll">ALL</button>
+                <button onclick="filterCategory('scrim/blast')" class="cat-btn bg-gray-800 text-gray-300 px-4 py-2 rounded font-bold text-xs uppercase whitespace-nowrap border border-gray-700 hover:bg-gray-700 transition">scrim/blast</button>
+                <button onclick="filterCategory('SOLO (BR)')" class="cat-btn bg-gray-800 text-gray-300 px-4 py-2 rounded font-bold text-xs uppercase whitespace-nowrap border border-gray-700 hover:bg-gray-700 transition">SOLO (BR)</button>
+                <button onclick="filterCategory('DUO (BR)')" class="cat-btn bg-gray-800 text-gray-300 px-4 py-2 rounded font-bold text-xs uppercase whitespace-nowrap border border-gray-700 hover:bg-gray-700 transition">DUO (BR)</button>
+                <button onclick="filterCategory('T3')" class="cat-btn bg-gray-800 text-gray-300 px-4 py-2 rounded font-bold text-xs uppercase whitespace-nowrap border border-gray-700 hover:bg-gray-700 transition">T3</button>
+                <button onclick="filterCategory('T2')" class="cat-btn bg-gray-800 text-gray-300 px-4 py-2 rounded font-bold text-xs uppercase whitespace-nowrap border border-gray-700 hover:bg-gray-700 transition">T2</button>
+                <button onclick="filterCategory('T1')" class="cat-btn bg-gray-800 text-gray-300 px-4 py-2 rounded font-bold text-xs uppercase whitespace-nowrap border border-gray-700 hover:bg-gray-700 transition">T1</button>
+                <button onclick="filterCategory('CLASH SQUAD')" class="cat-btn bg-gray-800 text-gray-300 px-4 py-2 rounded font-bold text-xs uppercase whitespace-nowrap border border-gray-700 hover:bg-gray-700 transition">CLASH SQUAD</button>
+            </div>
+
+            <!-- Vertical Grid -->
+            <div id="joinGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                <!-- Cards injected via JS -->
+            </div>
+
+            <div class="pt-2">
+                <button id="seeAllJoinBtn" onclick="toggleSeeAllJoin()" class="bg-gray-800 hover:bg-gray-700 text-gray-200 px-6 py-2 rounded font-bold text-xs tracking-wider uppercase border border-gray-700 transition" data-key="seeAll">
+                    SEE ALL
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER SECTION -->
+    <footer id="rulesSection" class="bg-[#12161f] border-t border-gray-800 py-10 px-6 mt-16 text-gray-400">
+        <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-center divide-y md:divide-y-0 md:divide-x divide-gray-800">
+            <!-- Helpline -->
+            <div class="space-y-2 text-center md:text-left pr-0 md:pr-6">
+                <h3 class="text-lg font-bold text-white font-rajdhani uppercase tracking-wider flex items-center justify-center md:justify-start gap-2">
+                    <i class="fa-solid fa-headset text-ffGold"></i> <span data-key="helpline">Helpline</span>
+                </h3>
+                <p class="text-sm font-mono text-gray-300">
+                    WhatsApp : <a href="https://wa.me/8801933510033" target="_blank" class="text-ffGold hover:underline">01933510033</a>
+                </p>
+                <p class="text-xs text-gray-500" data-key="helpSub">Contact us for custom room queries & payment issues.</p>
+            </div>
+
+            <!-- Rules Link -->
+            <div class="space-y-2 text-center md:text-left pl-0 md:pl-8 pt-6 md:pt-0">
+                <h3 class="text-lg font-bold text-white font-rajdhani uppercase tracking-wider flex items-center justify-center md:justify-start gap-2">
+                    <i class="fa-solid fa-book-bookmark text-ffGold"></i> <span data-key="rulesTitle">RULES</span>
+                </h3>
+                <p class="text-sm">
+                    <button onclick="openRulesModal()" class="text-ffGold hover:underline font-semibold text-left" data-key="rulesClickText">
+                        click here to know how to join or disqualified rules
+                    </button>
+                </p>
+                <p class="text-xs text-gray-500" data-key="rulesSub">Includes hacker policy, Emulator restrictions & scoring tables.</p>
+            </div>
+        </div>
+
+        <div class="max-w-5xl mx-auto mt-10 pt-6 border-t border-gray-800/60 text-center text-xs text-gray-600 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div>© 2026 Free Fire Esports Unofficial. All Rights Reserved.</div>
+            <div class="flex gap-4 text-base text-gray-400">
+                <a href="#" class="hover:text-ffGold"><i class="fa-brands fa-youtube"></i></a>
+                <a href="#" class="hover:text-ffGold"><i class="fa-brands fa-facebook"></i></a>
+                <a href="#" class="hover:text-ffGold"><i class="fa-brands fa-discord"></i></a>
+                <a href="#" class="hover:text-ffGold"><i class="fa-brands fa-whatsapp"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- REGISTRATION MODAL -->
+    <div id="joinModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-ffCardBg border border-ffGold/40 rounded-xl w-full max-w-md p-6 relative shadow-2xl">
+            <button onclick="closeModal('joinModal')" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <h3 id="modalTourneyTitle" class="text-xl font-bold font-rajdhani text-ffGold uppercase mb-2">Tournament Title</h3>
+            <p class="text-xs text-gray-400 mb-4 font-mono" data-key="fillRegDetails">Fill details to register for this tournament.</p>
+            
+            <form onsubmit="submitRegistration(event)" class="space-y-4">
+                <input type="hidden" id="modalTourneyId">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 mb-1" data-key="lblTeamName">Team Name / Player Name</label>
+                    <input type="text" id="regTeamName" required class="w-full bg-black border border-gray-700 rounded px-3 py-2 text-sm text-white focus:border-ffGold outline-none" placeholder="e.g. VIP Gaming">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 mb-1" data-key="lblLeaderUID">Leader Free Fire UID</label>
+                    <input type="number" id="regUID" required class="w-full bg-black border border-gray-700 rounded px-3 py-2 text-sm text-white focus:border-ffGold outline-none" placeholder="e.g. 192839201">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 mb-1" data-key="lblPhone">WhatsApp Phone Number</label>
+                    <input type="text" id="regPhone" required class="w-full bg-black border border-gray-700 rounded px-3 py-2 text-sm text-white focus:border-ffGold outline-none" placeholder="01933510033">
+                </div>
+                <div class="pt-2">
+                    <button type="submit" class="w-full py-3 bg-ffGold text-black font-extrabold rounded-lg hover:bg-yellow-400 transition shadow-lg uppercase tracking-wider text-sm" data-key="btnConfirmReg">
+                        Confirm Registration
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- RULES MODAL -->
+    <div id="rulesModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-ffCardBg border border-gray-700 rounded-xl w-full max-w-2xl p-6 relative shadow-2xl max-h-[85vh] overflow-y-auto space-y-4">
+            <button onclick="closeModal('rulesModal')" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <h3 class="text-2xl font-bold font-rajdhani text-ffGold uppercase border-b border-gray-800 pb-2">
+                <i class="fa-solid fa-gavel mr-2"></i> <span data-key="officialRulesModal">Official Tournament Rules</span>
+            </h3>
+            <div class="text-sm text-gray-300 space-y-3 leading-relaxed" id="rulesContent">
+                <!-- Rules Content dynamically swapped -->
+            </div>
+            <div class="pt-4 border-t border-gray-800 text-right">
+                <button onclick="closeModal('rulesModal')" class="px-5 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded font-bold text-xs uppercase" data-key="btnUnderstand">
+                    I Understand
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HOSTING SITE / ADMIN PORTAL MODAL -->
+    <div id="adminModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#121620] border border-red-500/50 rounded-xl w-full max-w-3xl p-6 relative shadow-2xl max-h-[90vh] overflow-y-auto space-y-6">
+            <button onclick="closeModal('adminModal')" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+
+            <div class="flex items-center gap-3 border-b border-gray-800 pb-3">
+                <i class="fa-solid fa-crown text-2xl text-ffGold"></i>
+                <div>
+                    <h3 class="text-2xl font-bold font-rajdhani text-white uppercase" data-key="adminTitle">Tournament Host Site (Owner Only)</h3>
+                    <p class="text-xs text-gray-400" data-key="adminSub">Manage, host, and create new Free Fire tournaments instantly.</p>
+                </div>
+            </div>
+
+            <!-- Create Form -->
+            <form onsubmit="handleCreateTournament(event)" class="bg-black/40 p-4 rounded-xl border border-gray-800 space-y-4">
+                <h4 class="text-sm font-bold text-ffGold uppercase tracking-wider" data-key="hostNew">Host New Tournament</h4>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1" data-key="lblTourneyTitle">Tournament Title</label>
+                        <input type="text" id="hostTitle" required placeholder="e.g. blast tournament" class="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm text-white focus:border-ffGold outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1" data-key="lblCategory">Category</label>
+                        <select id="hostCategory" class="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm text-white focus:border-ffGold outline-none">
+                            <option value="scrim/blast">scrim/blast</option>
+                            <option value="SOLO (BR)">SOLO (BR)</option>
+                            <option value="DUO (BR)">DUO (BR)</option>
+                            <option value="T3">T3</option>
+                            <option value="T2">T2</option>
+                            <option value="T1">T1</option>
+                            <option value="CLASH SQUAD">CLASH SQUAD</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1" data-key="lblDateTime">Date & Time</label>
+                        <input type="datetime-local" id="hostDateTime" required class="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm text-white focus:border-ffGold outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1" data-key="lblEntryFee">Entry Fee (Tk)</label>
+                        <input type="number" id="hostEntryFee" placeholder="0" required class="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm text-white focus:border-ffGold outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1" data-key="lblPrizePool">Prize Pool (Tk)</label>
+                        <input type="number" id="hostPrizePool" placeholder="10000" required class="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm text-white focus:border-ffGold outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1" data-key="lblBannerPreset">Banner Color Preset</label>
+                        <select id="hostBannerPreset" class="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm text-white focus:border-ffGold outline-none">
+                            <option value="#E86B6B">Rose Pink (Wireframe Match)</option>
+                            <option value="#FF4D00">Esports Fire Orange</option>
+                            <option value="#FFB800">Cyber Gold</option>
+                            <option value="#3B82F6">Neon Blue</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition uppercase tracking-wider text-xs" data-key="btnPublish">
+                    Publish Tournament
+                </button>
+            </form>
+
+            <div class="space-y-3">
+                <h4 class="text-sm font-bold text-gray-300 uppercase tracking-wider" data-key="activeHosted">Active Hosted Tournaments</h4>
+                <div id="adminTourneyList" class="space-y-2 max-h-60 overflow-y-auto">
+                    <!-- Dynamic List -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT APP LOGIC & TRANSLATION ENGINE -->
+    <script>
+        // --- TRANSLATION DATA ---
+        let currentLang = 'en'; // 'en' or 'bn'
+
+        const translations = {
+            en: {
+                myMenu: "My Menu",
+                hostPortal: "Host Portal",
+                playerMenu: "MY PLAYER MENU",
+                editProfile: "Edit Profile",
+                updateInfo: "Update Profile Information",
+                lblUsername: "Username",
+                lblIGN: "In-Game Name (IGN)",
+                lblUID: "Free Fire UID",
+                saveChanges: "Save Changes",
+                accountSettings: "Account & Settings",
+                switchAccount: "Switch Account",
+                themeToggle: "Theme Toggle",
+                officialBadge: "Official Scrims & Tournaments",
+                nextStartIn: "Next Tournament Starts In",
+                navUpcoming: "Upcoming",
+                navJoin: "Join Tournament",
+                navRules: "Rules",
+                upcomingTitle: "UPCOMING TOURNAMENT",
+                sortedEarliest: "Sorted by earliest date",
+                seeAll: "SEE ALL",
+                showLess: "SHOW LESS",
+                joinTitle: "JOIN TOURNAMENT",
+                catAll: "ALL",
+                helpline: "Helpline",
+                helpSub: "Contact us for custom room queries & payment issues.",
+                rulesTitle: "RULES",
+                rulesClickText: "click here to know how to join or disqualified rules",
+                rulesSub: "Includes hacker policy, Emulator restrictions & scoring tables.",
+                fillRegDetails: "Fill details to register for this tournament.",
+                lblTeamName: "Team Name / Player Name",
+                lblLeaderUID: "Leader Free Fire UID",
+                lblPhone: "WhatsApp Phone Number",
+                btnConfirmReg: "Confirm Registration",
+                officialRulesModal: "Official Tournament Rules",
+                btnUnderstand: "I Understand",
+                adminTitle: "Tournament Host Site (Owner Only)",
+                adminSub: "Manage, host, and create new Free Fire tournaments instantly.",
+                hostNew: "Host New Tournament",
+                lblTourneyTitle: "Tournament Title",
+                lblCategory: "Category",
+                lblDateTime: "Date & Time",
+                lblEntryFee: "Entry Fee (Tk)",
+                lblPrizePool: "Prize Pool (Tk)",
+                lblBannerPreset: "Banner Color Preset",
+                btnPublish: "Publish Tournament",
+                activeHosted: "Active Hosted Tournaments",
+                entryFeeLabel: "ENTRY FEE:",
+                prizePoolLabel: "Prize pool:",
+                joinNowBtn: "JOIN NOW",
+                freeText: "FREE"
+            },
+            bn: {
+                myMenu: "মাই মেনু",
+                hostPortal: "হোস্ট পোর্টাল",
+                playerMenu: "আমার প্লেয়ার প্রোফাইল",
+                editProfile: "প্রোফাইল এডিট করুন",
+                updateInfo: "প্রোফাইল তথ্য আপডেট করুন",
+                lblUsername: "ইউজারনেম",
+                lblIGN: "ইন-গেম নেম (IGN)",
+                lblUID: "ফ্রি ফায়ার UID",
+                saveChanges: "সেভ করুন",
+                accountSettings: "একাউন্ট এবং সেটিংস",
+                switchAccount: "একাউন্ট সুইচ করুন",
+                themeToggle: "থিম পরিবর্তন",
+                officialBadge: "অফিসিয়াল স্ক্রিম ও টুর্নামেন্ট",
+                nextStartIn: "পরবর্তী টুর্নামেন্ট শুরু হতে বাকি",
+                navUpcoming: "আপকামিং",
+                navJoin: "জয়েন টুর্নামেন্ট",
+                navRules: "নিয়মাবলী",
+                upcomingTitle: "আপকামিং টুর্নামেন্ট",
+                sortedEarliest: "তারিখ এবং সময় অনুযায়ী সাজানো",
+                seeAll: "সবগুলো দেখুন",
+                showLess: "কম দেখান",
+                joinTitle: "জয়েন টুর্নামেন্ট",
+                catAll: "সবকটি",
+                helpline: "হেল্পলাইন",
+                helpSub: "কাস্টম রুম তথ্য বা পেমেন্ট সমস্যার জন্য যোগাযোগ করুন।",
+                rulesTitle: "রুলস (নিয়মাবলী)",
+                rulesClickText: "জয়েন করার নিয়ম ও ডিসকোয়ালিফাই রুলস জানতে এখানে ক্লিক করুন",
+                rulesSub: "হ্যাকার পলিসি, এমুলেটর সীমাবদ্ধতা এবং স্কোর টেবিল অন্তর্ভুক্ত।",
+                fillRegDetails: "টুর্নামেন্টে রেজিস্ট্রেশন করতে তথ্যগুলো পূরণ করুন।",
+                lblTeamName: "টিমের নাম / প্লেয়ারের নাম",
+                lblLeaderUID: "লিডারের ফ্রি ফায়ার UID",
+                lblPhone: "হোয়াটসঅ্যাপ ফোন নম্বর",
+                btnConfirmReg: "রেজিস্ট্রেশন নিশ্চিত করুন",
+                officialRulesModal: "অফিসিয়াল টুর্নামেন্ট নিয়মাবলী",
+                btnUnderstand: "আমি বুঝতে পেরেছি",
+                adminTitle: "টুর্নামেন্ট হোস্টিং সাইট (এডমিন ওনার)",
+                adminSub: "নতুন ফ্রি ফায়ার টুর্নামেন্ট তৈরি এবং পরিচালনা করুন।",
+                hostNew: "নতুন টুর্নামেন্ট হোস্ট করুন",
+                lblTourneyTitle: "টুর্নামেন্টের নাম",
+                lblCategory: "ক্যাটাগরি",
+                lblDateTime: "তারিখ ও সময়",
+                lblEntryFee: "এন্ট্রি ফি (টাকা)",
+                lblPrizePool: "প্রাইজ পুল (টাকা)",
+                lblBannerPreset: "ব্যানার কালার প্রিসেট",
+                btnPublish: "পাবলিশ টুর্নামেন্ট",
+                activeHosted: "অ্যাক্টিভ হোস্ট করা টুর্নামেন্টসমূহ",
+                entryFeeLabel: "এন্ট্রি ফি:",
+                prizePoolLabel: "প্রাইজ পুল:",
+                joinNowBtn: "জয়েন করুন",
+                freeText: "ফ্রি"
+            }
+        };
+
+        const rulesHTML = {
+            en: `
+                <h4 class="font-bold text-white uppercase text-base">1. General Rules</h4>
+                <ul class="list-disc pl-5 space-y-1 text-xs sm:text-sm text-gray-400">
+                    <li>All players must enter their correct Free Fire UID & IGN during registration.</li>
+                    <li>Room ID & Password will be provided 15 minutes before match start via WhatsApp.</li>
+                    <li>Hacking, scripting, or using third-party mod tools will lead to instant permanent ban.</li>
+                </ul>
+                <h4 class="font-bold text-white uppercase text-base">2. Disqualification Criteria</h4>
+                <ul class="list-disc pl-5 space-y-1 text-xs sm:text-sm text-gray-400">
+                    <li>Teaming up with rival teams inside custom rooms.</li>
+                    <li>Joining the wrong allotted slot inside the room.</li>
+                    <li>Using emulators in mobile-only scrims.</li>
+                </ul>
+            `,
+            bn: `
+                <h4 class="font-bold text-white uppercase text-base">১. সাধারণ নিয়মাবলী</h4>
+                <ul class="list-disc pl-5 space-y-1 text-xs sm:text-sm text-gray-400">
+                    <li>রেজিস্ট্রেশনের সময় সঠিক ফ্রি ফায়ার UID এবং IGN প্রদান করতে হবে।</li>
+                    <li>ম্যাচ শুরু হওয়ার ১৫ মিনিট আগে হোয়াটসঅ্যাপে রুম আইডি ও পাসওয়ার্ড দেওয়া হবে।</li>
+                    <li>হ্যাকিং, স্ক্রিপ্ট বা যেকোনো থার্ডপার্টি মড ব্যবহার করলে স্থায়ী ব্যান করা হবে।</li>
+                </ul>
+                <h4 class="font-bold text-white uppercase text-base">২. ডিসকোয়ালিফিকেশন কারণ</h4>
+                <ul class="list-disc pl-5 space-y-1 text-xs sm:text-sm text-gray-400">
+                    <li>কাস্টম রুমে অন্য টিমের সাথে টিমিং করলে।</li>
+                    <li>ভুল স্লটে জয়েন করলে।</li>
+                    <li>মোবাইল অনলি টুর্নামেন্টে এমুলেটর ব্যবহার করলে।</li>
+                </ul>
+            `
+        };
+
+        // --- TOURNAMENT STORE ---
+        const DEFAULT_TOURNAMENTS = [
+            {
+                id: 't1',
+                title: 'blast tournament',
+                category: 'scrim/blast',
+                dateStr: '2026-10-30T10:00',
+                timeDisplay: '10 : 00 AM',
+                dateDisplay: '30/10/2026',
+                entryFee: 0,
+                prizePool: 10000,
+                color: '#E86B6B'
+            },
+            {
+                id: 't2',
+                title: 'T2 Battle Royale Scrim',
+                category: 'T2',
+                dateStr: '2026-11-02T16:00',
+                timeDisplay: '04 : 00 PM',
+                dateDisplay: '02/11/2026',
+                entryFee: 50,
+                prizePool: 15000,
+                color: '#E86B6B'
+            },
+            {
+                id: 't3',
+                title: 'T1 Pro Championship',
+                category: 'T1',
+                dateStr: '2026-11-05T20:00',
+                timeDisplay: '08 : 00 PM',
+                dateDisplay: '05/11/2026',
+                entryFee: 100,
+                prizePool: 50000,
+                color: '#E86B6B'
+            },
+            {
+                id: 't4',
+                title: 'Solo Clash Cup',
+                category: 'SOLO (BR)',
+                dateStr: '2026-11-10T14:00',
+                timeDisplay: '02 : 00 PM',
+                dateDisplay: '10/11/2026',
+                entryFee: 20,
+                prizePool: 5000,
+                color: '#E86B6B'
+            },
+            {
+                id: 't5',
+                title: 'T3 Qualifier Cup',
+                category: 'T3',
+                dateStr: '2026-11-12T18:00',
+                timeDisplay: '06 : 00 PM',
+                dateDisplay: '12/11/2026',
+                entryFee: 0,
+                prizePool: 8000,
+                color: '#E86B6B'
+            },
+            {
+                id: 't6',
+                title: 'Clash Squad 4v4 Showdown',
+                category: 'CLASH SQUAD',
+                dateStr: '2026-11-15T21:00',
+                timeDisplay: '09 : 00 PM',
+                dateDisplay: '15/11/2026',
+                entryFee: 40,
+                prizePool: 12000,
+                color: '#E86B6B'
+            }
+        ];
+
+        let tournaments = JSON.parse(localStorage.getItem('ff_tournaments')) || DEFAULT_TOURNAMENTS;
+        let selectedCategory = 'ALL';
+        let showAllUpcoming = false;
+        let showAllJoin = false;
+        let userProfile = JSON.parse(localStorage.getItem('ff_user_profile')) || {
+            username: 'FF_PRO_PLAYER',
+            ign: 'ShadowNinja',
+            uid: '1892837492'
+        };
+
+        window.onload = function() {
+            initHeroCanvas();
+            renderProfile();
+            updateLanguageUI();
+            renderTournaments();
+            startHeroCountdown();
+        };
+
+        // Dynamic Animated Ember Particles on Canvas
+        function initHeroCanvas() {
+            const canvas = document.getElementById('heroCanvas');
+            const ctx = canvas.getContext('2d');
+
+            function resize() {
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            const particles = Array.from({ length: 45 }, () => ({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 3 + 1,
+                speedY: -(Math.random() * 1.5 + 0.5),
+                color: Math.random() > 0.5 ? '#FFB800' : '#FF4D00',
+                opacity: Math.random()
+            }));
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.strokeStyle = 'rgba(255, 184, 0, 0.05)';
+                ctx.lineWidth = 1;
+                const gridSize = 40;
+                for (let x = 0; x < canvas.width; x += gridSize) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, canvas.height);
+                    ctx.stroke();
+                }
+                for (let y = 0; y < canvas.height; y += gridSize) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(canvas.width, y);
+                    ctx.stroke();
+                }
+
+                particles.forEach(p => {
+                    p.y += p.speedY;
+                    if (p.y < 0) {
+                        p.y = canvas.height;
+                        p.x = Math.random() * canvas.width;
+                    }
+                    ctx.fillStyle = p.color;
+                    ctx.globalAlpha = p.opacity;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+                ctx.globalAlpha = 1.0;
+
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        // --- LANGUAGE SWITCHER ENGINE ---
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'bn' : 'en';
+            document.getElementById('langLabel').innerText = currentLang === 'en' ? 'বাংলা' : 'English';
+            updateLanguageUI();
+            renderTournaments();
+        }
+
+        function updateLanguageUI() {
+            const langData = translations[currentLang];
+            document.querySelectorAll('[data-key]').forEach(elem => {
+                const key = elem.getAttribute('data-key');
+                if (langData[key]) {
+                    elem.innerText = langData[key];
+                }
+            });
+            document.getElementById('rulesContent').innerHTML = rulesHTML[currentLang];
+        }
+
+        // --- RENDER TOURNAMENTS ---
+        function renderTournaments() {
+            const sorted = [...tournaments].sort((a, b) => new Date(a.dateStr) - new Date(b.dateStr));
+            const tText = translations[currentLang];
+
+            // 1. Upcoming Grid
+            const upcomingGrid = document.getElementById('upcomingGrid');
+            upcomingGrid.innerHTML = '';
+            const upcomingList = showAllUpcoming ? sorted : sorted.slice(0, 3);
+
+            upcomingList.forEach(t => {
+                upcomingGrid.appendChild(createTournamentCard(t, tText));
+            });
+
+            // 2. Join Grid
+            const joinGrid = document.getElementById('joinGrid');
+            joinGrid.innerHTML = '';
+
+            let filtered = sorted;
+            if (selectedCategory !== 'ALL') {
+                filtered = sorted.filter(t => t.category.toLowerCase() === selectedCategory.toLowerCase());
+            }
+
+            const joinList = showAllJoin ? filtered : filtered.slice(0, 6);
+
+            if (joinList.length === 0) {
+                joinGrid.innerHTML = `
+                    <div class="col-span-full py-12 text-center text-gray-500 bg-gray-900/40 rounded-xl border border-gray-800">
+                        <i class="fa-solid fa-ghost text-3xl mb-2 text-ffGold"></i>
+                        <p class="text-sm font-rajdhani">No tournaments available in this category.</p>
+                    </div>
+                `;
+            } else {
+                joinList.forEach(t => {
+                    joinGrid.appendChild(createTournamentCard(t, tText));
+                });
+            }
+        }
+
+        function createTournamentCard(t, tText) {
+            const card = document.createElement('div');
+            card.className = "bg-gray-900/80 rounded-2xl overflow-hidden border border-gray-800 shadow-xl flex flex-col hover:border-ffGold/40 transition duration-300";
+
+            card.innerHTML = `
+                <div class="h-32 sm:h-36 p-4 flex items-end relative overflow-hidden" style="background-color: ${t.color || '#E86B6B'};">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                    <span class="relative z-10 text-white font-rajdhani font-extrabold text-xl uppercase tracking-wider drop-shadow">
+                        ${t.category}
+                    </span>
+                    <span class="absolute top-3 right-3 bg-black/60 text-ffGold text-[10px] font-mono px-2 py-1 rounded backdrop-blur">
+                        <i class="fa-solid fa-bolt mr-1"></i>LIVE
+                    </span>
+                </div>
+
+                <div class="p-4 bg-gray-900/90 flex-1 flex flex-col justify-between space-y-3">
+                    <div>
+                        <h4 class="font-bold text-white text-base font-rajdhani uppercase tracking-wide truncate">
+                            ${t.title}
+                        </h4>
+                        <div class="text-xs text-gray-400 font-mono mt-1 flex items-center gap-3">
+                            <span><i class="fa-regular fa-clock mr-1 text-ffGold"></i>${t.timeDisplay}</span>
+                            <span><i class="fa-regular fa-calendar-days mr-1 text-ffGold"></i>${t.dateDisplay}</span>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-gray-800 pt-2 flex justify-between items-center text-xs font-mono">
+                        <span class="text-gray-300">
+                            ${tText.entryFeeLabel} <strong class="text-white">${t.entryFee === 0 ? tText.freeText : t.entryFee + ' Tk'}</strong>
+                        </span>
+                        <span class="text-gray-300">
+                            ${tText.prizePoolLabel} <strong class="text-ffGold">${t.prizePool} tk</strong>
+                        </span>
+                    </div>
+
+                    <button onclick="openJoinModal('${t.id}')" class="w-full py-2 bg-ffGold text-black font-extrabold text-xs uppercase rounded hover:bg-yellow-400 transition shadow tracking-wider">
+                        ${tText.joinNowBtn}
+                    </button>
+                </div>
+            `;
+            return card;
+        }
+
+        function filterCategory(cat) {
+            selectedCategory = cat;
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                if (btn.innerText.trim().toUpperCase() === cat.toUpperCase()) {
+                    btn.className = "cat-btn bg-ffGold text-black px-4 py-2 rounded font-bold text-xs uppercase whitespace-nowrap border border-ffGold transition";
+                } else {
+                    btn.className = "cat-btn bg-gray-800 text-gray-300 px-4 py-2 rounded font-bold text-xs uppercase whitespace-nowrap border border-gray-700 hover:bg-gray-700 transition";
+                }
+            });
+            renderTournaments();
+        }
+
+        function toggleSeeAllUpcoming() {
+            showAllUpcoming = !showAllUpcoming;
+            document.getElementById('seeAllUpcomingBtn').innerText = showAllUpcoming ? translations[currentLang].showLess : translations[currentLang].seeAll;
+            renderTournaments();
+        }
+
+        function toggleSeeAllJoin() {
+            showAllJoin = !showAllJoin;
+            document.getElementById('seeAllJoinBtn').innerText = showAllJoin ? translations[currentLang].showLess : translations[currentLang].seeAll;
+            renderTournaments();
+        }
+
+        // Live Countdown
+        function startHeroCountdown() {
+            function update() {
+                const sorted = [...tournaments].sort((a, b) => new Date(a.dateStr) - new Date(b.dateStr));
+                if (sorted.length === 0) return;
+
+                const targetDate = new Date(sorted[0].dateStr).getTime();
+                const now = new Date().getTime();
+                const diff = targetDate - now;
+
+                if (diff <= 0) {
+                    document.getElementById('heroCountdown').innerText = "REGISTRATION OPEN";
+                    return;
+                }
+
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+                document.getElementById('heroCountdown').innerText = 
+                    `${String(days).padStart(2, '0')}d : ${String(hours).padStart(2, '0')}h : ${String(mins).padStart(2, '0')}m : ${String(secs).padStart(2, '0')}s`;
+            }
+            update();
+            setInterval(update, 1000);
+        }
+
+        // Sidebar Controls
+        function toggleSidebar() {
+            document.getElementById('sidebarDrawer').classList.toggle('-translate-x-full');
+            document.getElementById('sidebarOverlay').classList.toggle('hidden');
+        }
+
+        function renderProfile() {
+            document.getElementById('displayUsername').innerText = userProfile.username;
+            document.getElementById('displayIGN').innerText = userProfile.ign;
+            document.getElementById('displayUID').innerText = userProfile.uid;
+
+            document.getElementById('inputUsername').value = userProfile.username;
+            document.getElementById('inputIGN').value = userProfile.ign;
+            document.getElementById('inputUID').value = userProfile.uid;
+        }
+
+        function toggleProfileEdit() {
+            document.getElementById('profileEditForm').classList.toggle('hidden');
+        }
+
+        function saveProfile() {
+            userProfile.username = document.getElementById('inputUsername').value.trim() || userProfile.username;
+            userProfile.ign = document.getElementById('inputIGN').value.trim() || userProfile.ign;
+            userProfile.uid = document.getElementById('inputUID').value.trim() || userProfile.uid;
+
+            localStorage.setItem('ff_user_profile', JSON.stringify(userProfile));
+            renderProfile();
+            toggleProfileEdit();
+        }
+
+        function switchAccount() {
+            const newName = prompt(currentLang === 'en' ? "Enter new account username:" : "নতুন অ্যাকাউন্টের ইউজারনেম দিন:", "Guest_Player_" + Math.floor(Math.random() * 1000));
+            if (newName) {
+                userProfile.username = newName;
+                userProfile.ign = newName + "_IGN";
+                userProfile.uid = Math.floor(100000000 + Math.random() * 900000000).toString();
+                localStorage.setItem('ff_user_profile', JSON.stringify(userProfile));
+                renderProfile();
+            }
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            document.getElementById('themeLabel').innerText = isDark ? 'Dark Cyber' : 'Light Esports';
+        }
+
+        // Modals
+        function openJoinModal(tourneyId) {
+            const tourney = tournaments.find(t => t.id === tourneyId);
+            if (!tourney) return;
+
+            document.getElementById('modalTourneyId').value = tourney.id;
+            document.getElementById('modalTourneyTitle').innerText = tourney.title + " (" + tourney.category + ")";
+            document.getElementById('regUID').value = userProfile.uid;
+            document.getElementById('joinModal').classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function openRulesModal() {
+            document.getElementById('rulesModal').classList.remove('hidden');
+        }
+
+        function openAdminModal() {
+            renderAdminList();
+            document.getElementById('adminModal').classList.remove('hidden');
+        }
+
+        function submitRegistration(e) {
+            e.preventDefault();
+            const team = document.getElementById('regTeamName').value;
+            const uid = document.getElementById('regUID').value;
+            const phone = document.getElementById('regPhone').value;
+
+            alert(currentLang === 'en' 
+                ? `Registration Successful!\nTeam: ${team}\nUID: ${uid}\nWe will contact via WhatsApp (${phone})!` 
+                : `রেজিস্ট্রেশন সফল হয়েছে!\nটিম: ${team}\nUID: ${uid}\nআমরা হোয়াটসঅ্যাপে (${phone}) রুম তথ্য প্রদান করব!`);
+            closeModal('joinModal');
+        }
+
+        // Admin Hosting Logic
+        function handleCreateTournament(e) {
+            e.preventDefault();
+            const title = document.getElementById('hostTitle').value;
+            const category = document.getElementById('hostCategory').value;
+            const dtRaw = document.getElementById('hostDateTime').value;
+            const entryFee = parseInt(document.getElementById('hostEntryFee').value) || 0;
+            const prizePool = parseInt(document.getElementById('hostPrizePool').value) || 0;
+            const color = document.getElementById('hostBannerPreset').value;
+
+            const dt = new Date(dtRaw);
+            const dateDisplay = `${String(dt.getDate()).padStart(2, '0')}/${String(dt.getMonth() + 1).padStart(2, '0')}/${dt.getFullYear()}`;
+            let hours = dt.getHours();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12 || 12;
+            const timeDisplay = `${String(hours).padStart(2, '0')} : ${String(dt.getMinutes()).padStart(2, '0')} ${ampm}`;
+
+            const newTourney = {
+                id: 't_' + Date.now(),
+                title,
+                category,
+                dateStr: dtRaw,
+                timeDisplay,
+                dateDisplay,
+                entryFee,
+                prizePool,
+                color
+            };
+
+            tournaments.unshift(newTourney);
+            localStorage.setItem('ff_tournaments', JSON.stringify(tournaments));
+            renderTournaments();
+            renderAdminList();
+
+            document.getElementById('hostTitle').value = '';
+            alert(currentLang === 'en' ? 'New Tournament Published!' : 'নতুন টুর্নামেন্ট পাবলিশ হয়েছে!');
+        }
+
+        function deleteTournament(id) {
+            tournaments = tournaments.filter(t => t.id !== id);
+            localStorage.setItem('ff_tournaments', JSON.stringify(tournaments));
+            renderTournaments();
+            renderAdminList();
+        }
+
+        function renderAdminList() {
+            const container = document.getElementById('adminTourneyList');
+            container.innerHTML = '';
+            tournaments.forEach(t => {
+                const item = document.createElement('div');
+                item.className = "flex justify-between items-center bg-gray-900 p-3 rounded border border-gray-800 text-xs";
+                item.innerHTML = `
+                    <div>
+                        <div class="font-bold text-white font-rajdhani uppercase">${t.title} <span class="text-ffGold">(${t.category})</span></div>
+                        <div class="text-gray-400 font-mono">${t.dateDisplay} @ ${t.timeDisplay} | Prize: ${t.prizePool} Tk</div>
+                    </div>
+                    <button onclick="deleteTournament('${t.id}')" class="bg-red-900/60 hover:bg-red-800 text-red-300 px-3 py-1.5 rounded border border-red-700 font-semibold">
+                        Delete
+                    </button>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
